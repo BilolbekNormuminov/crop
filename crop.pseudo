@@ -1,8 +1,10 @@
 CLASS Crop
-	
-	PRIVATE Growth : STRING
+    
+    // A generic food crop
+
+	PRIVATE Growth : REAL
 	PRIVATE DaysGrowing : INTEGER
-	PRIVATE GrowthRate : INTEGER
+	PRIVATE GrowthRate : REAL
 	PRIVATE LightNeed : INTEGER
 	PRIVATE WaterNeed : INTEGER
 	PRIVATE Status : STRING
@@ -56,6 +58,13 @@ CLASS Crop
 		
 	ENDFUNCTION
 	
+    PUBLIC PROCEDURE PrintReport()
+        OUTPUT "Type: ", Type
+        OUTPUT "Status: ", Status
+        OUTPUT "Growth: ", Growth
+        OUTPUT "Days growing: ", DaysGrowing
+    ENDPROCEDURE
+
 	PUBLIC PROCEDURE UpdateStatus()
 
 		IF Growth > 15 THEN
@@ -93,6 +102,54 @@ CLASS Crop
 	
 ENDCLASS
 
+
+CLASS Potate INHERITS Crop
+    
+    // A potato crop
+
+    PUBLIC PROCEDURE NEW()
+
+        SUPER.NEW(1, 3, 6)
+        Type <- "Potato"
+
+    ENDPROCEDURE
+
+    PUBLIC PROCEDURE Grow(Light : INTEGER, Water : INTEGER)
+        
+        IF light >= LightNeed AND Water >= WaterNeed THEN
+            IF Status = "Seedling" AND Water >= WaterNeed THEN
+                Growth <- Growth + GrowthRate * 1.5
+            ELSE
+                IF Status = "Young" AND Water >= WaterNeed THEN
+                    Growth <- Growth + GrowthRate * 1.25
+                ELSE
+                    Growth <- Growth + GrowthRate
+                ENDIF
+            ENDIF
+        ENDIF
+
+        DaysGrowing <- DaysGrowing + 1
+        CALL UpdateStatus
+
+    ENDPROCEDURE
+
+ENDCLASS
+
+
+CLASS Wheat INHERITS Crop
+
+    // A wheat crop
+
+    PUBLIC PROCEDURE NEW()
+
+        SUPER.NEW(1, 1, 1)
+        Type <- "Wheat"
+
+    ENDPROCEDURE
+
+ENDCLASS
+
+
 PROCEDURE AutoGrow(BYREF Crop1 : Crop, Days : INTEGER)
     DECLARE Day : INTEGER
     DECLARE Light : INTEGER
@@ -105,6 +162,7 @@ PROCEDURE AutoGrow(BYREF Crop1 : Crop, Days : INTEGER)
         Crop1.Grow(Light, Water)
     NEXT Day
 ENDPROCEDURE
+
 
 PROCEDURE ManualGrow(BYREF Crop1 : CROP)
     DECLARE Light : INTEGER
@@ -138,6 +196,7 @@ PROCEDURE ManualGrow(BYREF Crop1 : CROP)
 
 ENDPROCEDURE
 
+
 PROCEDURE ManageCrop(BYREF Crop1 : Crop)
     DECLARE Option : INEGER
     DECLARE NoExit : BOOLEAN
@@ -156,14 +215,15 @@ PROCEDURE ManageCrop(BYREF Crop1 : Crop)
 
         CASE OF Option
             1:
-                Crop1.ManualGrow(Crop1)
+                ManualGrow(Crop1)
             2:
-
+                AutoGrow(Crop1, 30)
             3:
-
+                Crop1.PrintReport()
             0:
                 NoExit <- False
-            OTHERWISE
+            OTHERWISE:
+                OUTPUT "Please, enter enter a valid option"
         ENDCASE
 
     ENDWHILE
@@ -172,14 +232,45 @@ PROCEDURE ManageCrop(BYREF Crop1 : Crop)
 
 ENDPROCEDURE
 
+
+FUNCTION CreateCrop() RETURNS Crop
+    
+    DECLARE Choice : INTEGER
+    DECLARE Valid : INTEGER
+    DECLARE NewCrop : Crop
+
+    OUTPUT "Which crop would you like to create?"
+    OUTPUT "1. Potato"
+    OUTPUT "2. Wheat"
+    OUTPUT "Please select an option from the above menu"
+
+    Valid <- FALSE
+
+    REPEAT
+        
+        OUTPUT "Option selected: "
+        INPUT Choice
+        
+        IF Choice = 1 OR Choice = 2 THEN
+            Valid <- TRUE
+        ENDIF
+
+    UNTIL Valid
+
+    CASE OF Choice
+        1:
+            NewCrop <- NEW Potato()
+        2:
+            NewCrop <- New Wheat()
+    ENDCASE
+
+ENDFUCNTION
+
+
 // Main program
 
-NewCrop <- New Crop(1, 4, 3)
+DECLARE NewCrop : Crop
 
-OUTPUT NewCrop.GetNeeds()
-OUTPUT NewCrop.GetReport()
-
-CALL NewCrop.Grow(4, 4)
-
-OUTPUT NewCrop.GetReport()
+NewCrop <- CreateCrop()
+ManageCrop(NewCrop)
 
