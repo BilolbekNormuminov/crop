@@ -1,0 +1,185 @@
+CLASS Crop
+	
+	PRIVATE Growth : STRING
+	PRIVATE DaysGrowing : INTEGER
+	PRIVATE GrowthRate : INTEGER
+	PRIVATE LightNeed : INTEGER
+	PRIVATE WaterNeed : INTEGER
+	PRIVATE Status : STRING
+	PRIVATE Type : STRING
+	
+	PUBLIC PROCEDURE NEW(NewGrowthRate : INTEGER, NewLightNeed : INTEGER, NewWaterNeed : INTEGER)
+		
+		Growth <- 0
+		DaysGrowing <- 0
+		GrowthRate <- NewGrowthRate
+		LightNeed <- NewLightNeed
+		WaterNeed <- NewWaterNeed
+		Status <- "Seed"
+		Type <- "Generic"
+		
+	ENDPROCEDURE
+	
+	PUBLIC FUNCTION GetNeeds() RETURNS Needs
+		
+		TYPE Needs
+			DECLARE LightNeed : INTEGER
+			DECLARE WaterNeed : INTEGER
+		ENDTYPE
+		
+		DECLARE CropNeeds : Needs
+		
+		CropNeeds.LightNeed <- LightNeed
+		CropNeeds.WaterNeed <- WaterNeed
+		
+		RETURN CropNeeds
+		
+	ENDFUNCTION
+	
+	PUBLIC FUNCTION GetReport() RETURNS Report
+		
+		TYPE Report
+			DECLARE Type : STRING
+			DECLARE Status : STRING
+			DECLARE Growth : INTEGER
+			DECLARE DaysGrowing : INTEGER
+		ENDTYPE
+		
+		DECLARE CropReport : Report
+		
+		CropReport.Type <- Type
+		CropReport.Status <- Status
+		CropReport.Growth <- Growth
+		CropReport.DaysGrowing <- DaysGrowing
+		
+		RETURN CropReport
+		
+	ENDFUNCTION
+	
+	PUBLIC PROCEDURE UpdateStatus()
+
+		IF Growth > 15 THEN
+			Status <- "Old"
+		ELSE
+			IF Growth > 10 THEN
+				Status <- "Mature"
+			ELSE
+				IF Growth > 5 THEN
+					Status <- "Young"
+				ELSE
+					IF Growth > 0 THEN
+						Status <- "Seedling"
+					ELSE
+						IF Growth = 0 THEN
+							Status <- "Seed"					
+						ENDIF
+					ENDIF
+				ENDIF
+			ENDIF
+		ENDIF
+
+	ENDPROCEDURE
+	
+	PUBLIC PROCEDURE Grow(Light : INTEGER, Water : INTEGER)
+
+		IF Light >= LightNeed AND Water >= WaterNeed THEN
+			Growth <- Growth + GrowthRate
+		ENDIF
+		
+		DaysGrowing <- DaysGrowing + 1
+		CALL UpdateStatus
+
+	ENDPROCEDURE
+	
+ENDCLASS
+
+PROCEDURE AutoGrow(BYREF Crop1 : Crop, Days : INTEGER)
+    DECLARE Day : INTEGER
+    DECLARE Light : INTEGER
+    DECLARE Water : INTEGER
+
+    FOR Day <- 1 TO Days
+        Light <- INT(RAND(9)) + 1
+        WATER <- INT(RAND(9)) + 1
+
+        Crop1.Grow(Light, Water)
+    NEXT Day
+ENDPROCEDURE
+
+PROCEDURE ManualGrow(BYREF Crop1 : CROP)
+    DECLARE Light : INTEGER
+    DECLARE Water : INTEGER
+    DECLARE Valid : BOOLEAN
+
+    Valid <- False
+
+    REPEAT
+        OUTPUT "Please, enter a value for light (1-10): "
+        INPUT Light
+
+        IF Light >= 1 AND Light <= 10 THEN
+            Valid <- TRUE
+        ELSE   
+            Valid <- FALSE
+        ENDIF
+
+        OUTPUT "Please, enter a value for water (1-10): "
+        INPUT Water
+
+        IF Light >= 1 AND Light <= 10 THEN
+            Valid <- TRUE
+        ELSE   
+            Valid <- FALSE
+        ENDIF
+
+    UNTIL Valid
+    
+    Crop1.Grow(Light, Water)
+
+ENDPROCEDURE
+
+PROCEDURE ManageCrop(BYREF Crop1 : Crop)
+    DECLARE Option : INEGER
+    DECLARE NoExit : BOOLEAN
+    NoExit <- True
+
+    OUTPUT "This is crop management program"
+    
+    WHILE NoExit
+        OUTPUT "1. Grow manually over 1 day"
+        OUTPUT "2. Grow automatically over 30 days"
+        OUTPUT "3. Report status"
+        OUTPUT "0. Exit test program"
+        OUTPUT "Please select an option from the above menu"
+
+        INPUT Option
+
+        CASE OF Option
+            1:
+                Crop1.ManualGrow(Crop1)
+            2:
+
+            3:
+
+            0:
+                NoExit <- False
+            OTHERWISE
+        ENDCASE
+
+    ENDWHILE
+
+    OUTPUT "Thank you for using our crop management program!"
+
+ENDPROCEDURE
+
+// Main program
+
+NewCrop <- New Crop(1, 4, 3)
+
+OUTPUT NewCrop.GetNeeds()
+OUTPUT NewCrop.GetReport()
+
+CALL NewCrop.Grow(4, 4)
+
+OUTPUT NewCrop.GetReport()
+
