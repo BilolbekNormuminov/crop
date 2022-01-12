@@ -103,7 +103,7 @@ CLASS Crop
 ENDCLASS
 
 
-CLASS Potate INHERITS Crop
+CLASS Potato INHERITS Crop
     
     // A potato crop
 
